@@ -66,8 +66,8 @@ const LoginPopup = ({ setShowLogin, setRefreshTrigger, isSignUp, setIsSignUp }) 
         if (response.data.user) {
           alert("Login Successful");
           localStorage.setItem("user", JSON.stringify(response.data.user));
-          setRefreshTrigger((prev) => !prev); // Trigger navbar refresh
-          setShowLogin(false); // Close the login popup
+          setRefreshTrigger((prev) => !prev);
+          setShowLogin(false);
         } else {
           setError("Login Failed");
         }

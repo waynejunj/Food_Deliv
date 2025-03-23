@@ -7,7 +7,7 @@ const FoodItem = ({ id, name, price, description, image, setShowLogin, setIsSign
   const { cartItems, addToCart, removeFromCart } = useContext(StoreContext);
 
   const handleAddToCart = () => {
-    addToCart(id, setShowLogin, setIsSignUp); // Pass setShowLogin and setIsSignUp
+    addToCart(id, setShowLogin, setIsSignUp);
   };
 
   return (

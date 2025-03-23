@@ -4,15 +4,17 @@ import "./Navbar.css";
 import { assets } from "../../assets/assets";
 import { Link, useNavigate } from "react-router-dom";
 
-const Navbar = ({ setShowLogin, refreshTrigger, setIsSignUp }) => {
-  const { getTotalQuantity } = useContext(StoreContext);
+const Navbar = ({ setShowLogin, setIsSignUp, refreshTrigger }) => {
+  const { getTotalQuantity, food_list, addToCart } = useContext(StoreContext); // Add addToCart from context
   const totalQuantity = getTotalQuantity();
   const navigate = useNavigate();
 
   const [loggedIn, setLoggedIn] = useState(false);
   const [user, setUser] = useState({});
   const [menu, setMenu] = useState("home");
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false); // State to control menu visibility
+  const [searchQuery, setSearchQuery] = useState(""); // State for search input
+  const [filteredFoods, setFilteredFoods] = useState([]); // State to store filtered food items
 
   // Check if the user is logged in
   const checkLoggedIn = () => {
@@ -30,26 +32,11 @@ const Navbar = ({ setShowLogin, refreshTrigger, setIsSignUp }) => {
     checkLoggedIn();
   }, [refreshTrigger]);
 
-  // Close mobile menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (mobileMenuOpen && !event.target.closest('.navbar')) {
-        setMobileMenuOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [mobileMenuOpen]);
-
   // Handle logout
   const handleLogout = () => {
     localStorage.removeItem("user");
     setLoggedIn(false);
     setUser({});
-    setMobileMenuOpen(false);
     navigate("/");
   };
 
@@ -57,171 +44,117 @@ const Navbar = ({ setShowLogin, refreshTrigger, setIsSignUp }) => {
   const handleCartClick = () => {
     if (!loggedIn) {
       setShowLogin(true); // Show login popup
-      setIsSignUp(false); // Default to Sign In form
-      setMobileMenuOpen(false);
     } else {
-      setMobileMenuOpen(false);
-      navigate("/cart");
+      navigate("/cart"); // Navigate to cart if logged in
     }
   };
 
-  // Toggle mobile menu
-  const toggleMobileMenu = () => {
-    setMobileMenuOpen(!mobileMenuOpen);
+  // Handle search input change
+  const handleSearchChange = (e) => {
+    const query = e.target.value.toLowerCase();
+    setSearchQuery(query);
+
+    // Filter food items based on the search query
+    if (query.trim()) {
+      const filtered = food_list.filter((food) =>
+        food.name.toLowerCase().includes(query)
+      );
+      setFilteredFoods(filtered);
+    } else {
+      setFilteredFoods([]); // Clear filtered results if the query is empty
+    }
   };
 
-  // Close mobile menu when clicking a link
-  const handleMenuClick = (menuItem) => {
-    setMenu(menuItem);
-    setMobileMenuOpen(false);
+  // Handle search form submission
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search?query=${searchQuery}`);
+    }
+  };
+
+  // Handle click on a search result item
+  const handleSearchResultClick = (food) => {
+    if (!loggedIn) {
+      setShowLogin(true); // Show login popup if user is not logged in
+    } else {
+      addToCart(food); // Add the selected item to the cart
+      setSearchQuery(""); // Clear the search query
+      setFilteredFoods([]); // Clear the filtered results
+    }
+  };
+
+  // Toggle menu visibility
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
   };
 
   return (
     <div className="navbar">
-      <div className="navbar-left">
-        <Link to="/">
-          <img src={assets.logo} alt="Company Logo" className="logo" />
-        </Link>
+      {/* Hamburger Menu Icon */}
+      <div className="hamburger-menu" onClick={toggleMenu}>
+        ☰
       </div>
 
-      <ul className={`navbar-menu ${mobileMenuOpen ? "active" : ""}`}>
-        <Link
-          to="/"
-          onClick={() => handleMenuClick("home")}
-          className={menu === "home" ? "active" : ""}
-        >
-          Home
-        </Link>
-        <a
-          href="#explore-menu"
-          onClick={() => handleMenuClick("menu")}
-          className={menu === "menu" ? "active" : ""}
-        >
-          Menu
-        </a>
-        <a
-          href="#app-download"
-          onClick={() => handleMenuClick("mobile-app")}
-          className={menu === "mobile-app" ? "active" : ""}
-        >
-          Mobile App
-        </a>
-        <a
-          href="#footer"
-          onClick={() => handleMenuClick("contact-us")}
-          className={menu === "contact-us" ? "active" : ""}
-        >
-          Contact Us
-        </a>
+      {/* Logo */}
+      <Link to="/">
+        <img src={assets.logo} alt="Company Logo" className="logo" />
+      </Link>
 
-        {/* Mobile-only elements that appear in the dropdown menu */}
-        <div className="mobile-menu-items">
-          <div className="mobile-search">
-            <img
-              src={assets.search_icon}
-              alt="Search"
-              className="search-icon"
+      {/* Search Bar (Visible only when logged in) */}
+      {loggedIn && (
+        <div className="search-container">
+          <form className="search-bar" onSubmit={handleSearchSubmit}>
+            <input
+              type="text"
+              placeholder="Search for food..."
+              value={searchQuery}
+              onChange={handleSearchChange} // onChange function for dynamic filtering
             />
-          </div>
+            <button type="submit">
+              <img src={assets.search_icon} alt="Search" className="search-icon" />
+            </button>
+          </form>
 
-          {loggedIn ? (
-            <>
-              <div className="navbar-basket-icon mobile-cart" onClick={handleCartClick}>
-                <img src={assets.basket_icon} alt="Cart" />
-                <div className={totalQuantity === 0 ? "dotHidden" : "dot"}>
-                  <p>{totalQuantity}</p>
-                </div>
-              </div>
-              <div className="navbar-user mobile-user">
-                <p className="welcome-message">
-                  Welcome, <span className="username">{user?.username || "User"}</span>
-                </p>
-                <button
-                  className="logout-button"
-                  onClick={handleLogout}
-                  aria-label="Logout"
-                  title="Logout"
-                >
-                  <img src={assets.logout_icon} alt="Logout" className="logout-icon" />
-                  <span className="logout-text">Logout</span>
-                </button>
-              </div>
-            </>
-          ) : (
-            <div className="auth-buttons mobile-auth">
-              <button
-                className="sign-in-button"
-                onClick={() => {
-                  setShowLogin(true);
-                  setIsSignUp(false);
-                  setMobileMenuOpen(false);
-                }}
-                aria-label="Sign In"
-              >
-                Sign In
-              </button>
-              <button
-                className="sign-up-button"
-                onClick={() => {
-                  setShowLogin(true);
-                  setIsSignUp(true);
-                  setMobileMenuOpen(false);
-                }}
-                aria-label="Sign Up"
-              >
-                Sign Up
-              </button>
+          {/* Display filtered food items below the search bar */}
+          {searchQuery && (
+            <div className="search-results">
+              {filteredFoods.length > 0 ? (
+                filteredFoods.map((food) => (
+                  <div
+                    key={food.id}
+                    className="search-result-item"
+                    onClick={() => handleSearchResultClick(food)} // Add the selected item to the cart
+                  >
+                    {food.name}
+                  </div>
+                ))
+              ) : (
+                <div className="no-results">No results found</div>
+              )}
             </div>
           )}
         </div>
-      </ul>
+      )}
 
-      {/* Desktop navbar-right - modified for mobile */}
+      {/* Navbar Right Section */}
       <div className="navbar-right">
-        {/* Move hamburger menu to navbar-right */}
-        <div className="mobile-menu-toggle" onClick={toggleMobileMenu}>
-          <div className={`hamburger ${mobileMenuOpen ? "active" : ""}`}>
-            <span></span>
-            <span></span>
-            <span></span>
+        {/* Cart Icon (Visible only when logged in) */}
+        {loggedIn && (
+          <div className="navbar-basket-icon" onClick={handleCartClick}>
+            <img src={assets.basket_icon} alt="Cart" />
+            {totalQuantity > 0 && <div className="dot">{totalQuantity}</div>}
           </div>
-        </div>
-        
-        <img
-          src={assets.search_icon}
-          alt="Search"
-          className="search-icon"
-        />
-        {loggedIn ? (
-          <>
-            <div className="navbar-basket-icon" onClick={handleCartClick}>
-              <img src={assets.basket_icon} alt="Cart" />
-              <div className={totalQuantity === 0 ? "dotHidden" : "dot"}>
-                <p>{totalQuantity}</p>
-              </div>
-            </div>
-            <div className="navbar-user">
-              <p className="welcome-message">
-                Welcome, <span className="username">{user?.username || "User"}</span>
-              </p>
-              <button
-                className="logout-button"
-                onClick={handleLogout}
-                aria-label="Logout"
-                title="Logout"
-              >
-                <img src={assets.logout_icon} alt="Logout" className="logout-icon" />
-                <span className="logout-text">Logout</span>
-              </button>
-            </div>
-          </>
-        ) : (
+        )}
+
+        {/* Auth Buttons (Visible only when not logged in) */}
+        {!loggedIn && (
           <div className="auth-buttons">
             <button
               className="sign-in-button"
               onClick={() => {
-                setShowLogin(true);
-                setIsSignUp(false);
+                setShowLogin(true); // Show login popup
+                setIsSignUp(false); // Ensure it's the login form
               }}
               aria-label="Sign In"
             >
@@ -230,12 +163,30 @@ const Navbar = ({ setShowLogin, refreshTrigger, setIsSignUp }) => {
             <button
               className="sign-up-button"
               onClick={() => {
-                setShowLogin(true);
-                setIsSignUp(true);
+                setShowLogin(true); // Show login popup
+                setIsSignUp(true); // Ensure it's the signup form
               }}
               aria-label="Sign Up"
             >
               Sign Up
+            </button>
+          </div>
+        )}
+
+        {/* User Section (Visible only when logged in) */}
+        {loggedIn && (
+          <div className="navbar-user">
+            <p className="welcome-message">
+              Welcome, <span className="username">{user?.username || "User"}</span>
+            </p>
+            <button
+              className="logout-button"
+              onClick={handleLogout}
+              aria-label="Logout"
+              title="Logout"
+            >
+              <img src={assets.logout_icon} alt="Logout" className="logout-icon" />
+              <span>Logout</span>
             </button>
           </div>
         )}
