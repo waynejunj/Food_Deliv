@@ -1,0 +1,117 @@
+.login-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-popup-container {
+  width: 100%;
+  max-width: 100%;
+  color: #808080;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px 30px;
+  border-radius: 8px;
+  font-size: 14px;
+  animation: FadeIn 0.5s;
+}
+
+.login-popup-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--dark);
+}
+
+.login-popup-title img {
+  width: 16px;
+  cursor: pointer;
+}
+
+.login-popup-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.login-popup-inputs input {
+  outline: none;
+  border: 1px solid #c9c9c9;
+  padding: 10px;
+  border-radius: 4px;
+}
+
+.login-popup-container button {
+  border: none;
+  padding: 10px;
+  border-radius: 4px;
+  color: #fff;
+  background-color: var(--primary);
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.login-popup-condition {
+  display: flex;
+  align-items: start;
+  gap: 8px;
+  margin-top: -15px;
+}
+
+.login-popup-condition input {
+  margin-top: 5px;
+}
+
+.login-popup p span {
+  color: var(--primary);
+  font-weight: 600;
+  cursor: pointer;
+  padding-left: 4px;
+}
+
+@keyframes FadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (max-width: 600px) {
+  .login-popup {
+    width: 95%;
+    padding: 15px;
+  }
+
+  .login-popup-container {
+    padding: 20px;
+    gap: 16px;
+  }
+}
+button .react-spinners-clip-loader {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
