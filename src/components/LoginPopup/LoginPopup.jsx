@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./LoginPopup.css";
 import { assets } from "../../assets/assets";
 import { Auth } from "./auth";
@@ -16,6 +16,7 @@ const LoginPopup = ({ setShowLogin, setRefreshTrigger, isSignUp, setIsSignUp }) 
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // State for password visibility
 
   // Clear form fields
   const clearForm = () => {
@@ -26,12 +27,18 @@ const LoginPopup = ({ setShowLogin, setRefreshTrigger, isSignUp, setIsSignUp }) 
     setError("");
     setSuccess("");
     setLoading(false);
+    setShowPassword(false);
   };
 
   // Toggle between Sign In and Sign Up
   const toggleForm = () => {
     setIsSignUp(!isSignUp);
     clearForm();
+  };
+
+  // Toggle password visibility
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   // Submit function
@@ -54,7 +61,10 @@ const LoginPopup = ({ setShowLogin, setRefreshTrigger, isSignUp, setIsSignUp }) 
         const response = await Auth.signup(data);
 
         setSuccess(response.data.message);
-        clearForm();
+        // Automatically switch to sign-in form after 2 seconds
+        setTimeout(() => {
+          toggleForm();
+        }, 2000);
       } else {
         // Sign In logic
         const data = new FormData();
@@ -121,13 +131,22 @@ const LoginPopup = ({ setShowLogin, setRefreshTrigger, isSignUp, setIsSignUp }) 
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-          <input
-            type="password"
-            placeholder="Password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+          <div className="password-input-container">
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="Password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <span
+              className="password-toggle"
+              onClick={togglePasswordVisibility}
+              style={{ cursor: "pointer", marginLeft: "10px" }}
+            >
+              {showPassword ? "🙈" : "👁️"}
+            </span>
+          </div>
         </div>
 
         <button type="submit" disabled={loading}>

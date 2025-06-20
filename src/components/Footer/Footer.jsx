@@ -41,12 +41,12 @@ const Footer = () => {
           <h2>GET IN TOUCH</h2>
           <ul>
             <li>+254702535785</li>
-            <li>contact@tomato.com</li>
+            <li>ivoryladdle@gmail.com</li>
           </ul>
         </div>
       </div>
       <hr />
-      <p className="footer-copyright">Copyright 2024 © Tomato.com</p>
+      <p className="footer-copyright">Copyright 2024 © ivoryladdle.com</p>
     </footer>
   );
 };
